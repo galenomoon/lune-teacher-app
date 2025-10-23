@@ -18,6 +18,7 @@ export function usePWA() {
     const checkIfInstalled = async () => {
       if ("getInstalledRelatedApps" in navigator) {
         try {
+          // @ts-ignore
           const apps = await navigator.getInstalledRelatedApps();
           setIsInstalled(apps.length > 0);
         } catch {
