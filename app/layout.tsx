@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import AuthContextProvider from "@/contexts/auth-context";
+import { Toaster } from "sonner";
+import TanstackProvider from "@/contexts/query-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +30,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <TanstackProvider>
+          <AuthContextProvider>
+            {children}
+            <Toaster position="top-right" />
+          </AuthContextProvider>
+        </TanstackProvider>
       </body>
     </html>
   );
