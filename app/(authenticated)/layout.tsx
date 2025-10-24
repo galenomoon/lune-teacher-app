@@ -11,7 +11,7 @@ export default function AuthenticatedLayout({
 }) {
   return (
     <SidebarProvider>
-      {/* <Sidebar /> */}
+      <Sidebar />
       <SidebarInset>
         <div className="flex flex-1 flex-col gap-4 pt-0">{children}</div>
         <PWAInstallPrompt />

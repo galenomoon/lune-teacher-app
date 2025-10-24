@@ -1,6 +1,6 @@
 # PWA - Progressive Web App
 
-A aplicação Lune Professor agora é uma PWA completa! 🎉
+A aplicação Lune Professor agora é uma PWA completa seguindo o mesmo padrão do Lune Admin! 🎉
 
 ## Recursos Implementados
 
@@ -83,6 +83,70 @@ Substitua os arquivos em `public/`:
 - `256x256.png`
 - `384x384.png`
 - `512x512.png`
+
+## 🔍 Debugging - Por que o Prompt não aparece?
+
+Abra o DevTools (F12) e verifique os logs no console:
+
+### ✅ Logs esperados (em ordem):
+
+```
+🔵 PWA Hook: Inicializando...
+🔵 PWA Hook: Listeners registrados
+✅ Event 'beforeinstallprompt' disparado!
+✅ PWA é instalável! Prompt registrado.
+PWA Status: { isInstallable: true, isInstalled: false, hasShownPrompt: false }
+Preparando para mostrar PWA Install Prompt em 3 segundos...
+Mostrando PWA Install Prompt!
+```
+
+### ❌ Problemas comuns e soluções:
+
+**1. Event `beforeinstallprompt` não dispara**
+- ❌ A app já está instalada
+- ❌ Browser não suporta PWA
+- ❌ Não é HTTPS (exceto localhost)
+- ❌ Manifest.json inválido
+
+**Solução:**
+```javascript
+// No DevTools Console:
+// Verificar status
+navigator.getInstalledRelatedApps().then(apps => console.log(apps))
+// Desinstalar e recarregar
+location.reload()
+```
+
+**2. `isInstalled: true` (mas não quer instalar)**
+- App já está instalada
+- **Solução:** Desinstale e recarregue
+
+**3. `hasShownPrompt: true`**
+- Prompt já foi mostrado
+- **Solução:** Limpar localStorage ou nova sessão
+
+**4. `isInstallable: false`**
+- `beforeinstallprompt` não foi capturado
+- **Solução:** Ver problema 1
+
+### 🛠️ Checklist DevTools:
+
+**Application → Manifest:**
+- [ ] manifest.json está válido (sem erros)
+- [ ] Ícones estão carregando (✓ verde)
+- [ ] Colors configuradas (theme_color, background_color)
+- [ ] start_url = "/"
+- [ ] display = "standalone"
+
+**Application → Service Workers:**
+- [ ] SW está registrado
+- [ ] Status = "activated and running"
+- [ ] Scope = "/"
+
+**Console:**
+- [ ] Ver logs acima
+- [ ] Sem erros vermelhos
+- [ ] Verificar network tab para erros de recurso
 
 ## Próximas Melhorias
 

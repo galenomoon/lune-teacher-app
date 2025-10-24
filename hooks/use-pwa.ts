@@ -1,71 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
 }
 
 export function usePWA() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isInstallable, setIsInstallable] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Verificar se a app já está instalada
-    const checkIfInstalled = async () => {
-      if ("getInstalledRelatedApps" in navigator) {
-        try {
-          // @ts-ignore
-          const apps = await navigator.getInstalledRelatedApps();
-          setIsInstalled(apps.length > 0);
-        } catch {
-          // Ignorar erro
-        }
-      }
+    // Verificar se o app está rodando como PWA
+    const checkIfInstalled = () => {
+      // Verificar se está em modo standalone (PWA instalado)
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+      // Verificar se está rodando no iOS como PWA
+      const isIOSPWA = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+      
+      setIsInstalled(isStandalone || isIOSPWA);
+    };
 
-      // Verificar se está em standalone mode
-      if (window.matchMedia("(display-mode: standalone)").matches) {
-        setIsInstalled(true);
-      }
+    // Detectar evento de instalação
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setIsInstallable(true);
+    };
+
+    // Detectar se foi instalado
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
     };
 
     checkIfInstalled();
 
-    // Listener para beforeinstallprompt
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      const event = e as BeforeInstallPromptEvent;
-      setDeferredPrompt(event);
-      setIsInstallable(true);
-    };
-
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
   const installApp = async () => {
-    if (!deferredPrompt) {
-      return false;
-    }
+    if (!deferredPrompt) return false;
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-
+    
     if (outcome === "accepted") {
       setIsInstalled(true);
+      setIsInstallable(false);
       setDeferredPrompt(null);
       return true;
     }
-
+    
     return false;
   };
 

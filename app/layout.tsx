@@ -4,7 +4,6 @@ import "./globals.css";
 import AuthContextProvider from "@/contexts/auth-context";
 import { Toaster } from "sonner";
 import TanstackProvider from "@/contexts/query-context";
-import { ServiceWorkerRegister } from "@/components/global/service-worker-register";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,7 +74,6 @@ export default function RootLayout({
           <AuthContextProvider>
             {children}
             <Toaster position="top-right" />
-            <ServiceWorkerRegister />
           </AuthContextProvider>
         </TanstackProvider>
       </body>

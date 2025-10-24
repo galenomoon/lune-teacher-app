@@ -15,7 +15,7 @@ import Header from "./_components/header";
 import TeacherWorkedHoursTable from "@/components/global/teacher-worked-hours-table";
 
 export default function Home() {
-  const { currentUser } = useAuth();
+
   const {
     data: salaryData,
     isLoading: isLoadingSalary,

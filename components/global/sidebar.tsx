@@ -6,6 +6,7 @@ import {
   BanknoteArrowDown,
   Home,
   User,
+  LogOutIcon,
 } from "lucide-react";
 
 import {
@@ -22,11 +23,13 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { destroyCookie } from "nookies";
+import { useRouter } from "next/navigation";
 
 export function Sidebar() {
   const pathname = usePathname();
   const { toggleSidebar, open } = useSidebar();
-
+  const router = useRouter();
   const sidebarGroups = [
     {
       label: "Menu",
@@ -37,18 +40,18 @@ export function Sidebar() {
           icon: Home,
           pending: false,
         },
-        {
-          title: "Agenda",
-          url: "/agenda",
-          icon: Calendar,
-          pending: false,
-        },
-        {
-          title: "Financeiro",
-          url: "/financeiro",
-          icon: BanknoteArrowDown,
-          pending: false,
-        },
+        // {
+        //   title: "Agenda",
+        //   url: "/agenda",
+        //   icon: Calendar,
+        //   pending: false,
+        // },
+        // {
+        //   title: "Financeiro",
+        //   url: "/financeiro",
+        //   icon: BanknoteArrowDown,
+        //   pending: false,
+        // },
         {
           title: "Perfil",
           url: "/perfil",
@@ -58,6 +61,11 @@ export function Sidebar() {
       ],
     },
   ];
+
+  const handleLogout = () => {
+    destroyCookie(undefined, "token");
+    router.push("/login");
+  };
 
   return (
     <SidebarUI collapsible="icon" variant="sidebar">
@@ -135,6 +143,25 @@ export function Sidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  className={cn(
+                    "mt-0 hover:text-yellow-500  py-2 px-4 h-fit hover:bg-purple-lune transition-colors duration-300"
+                  )}
+                >
+                  <button onClick={handleLogout} className="cursor-pointer">
+                    <LogOutIcon />
+                    <span>Sair</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </SidebarUI>
   );
