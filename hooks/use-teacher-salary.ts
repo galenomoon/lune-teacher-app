@@ -33,11 +33,20 @@ interface TeacherSalarySummary {
   workedHours: WorkedHour[];
 }
 
-export function useTeacherSalary() {
+export function useTeacherSalary(month?: number, year?: number) {
   return useQuery<TeacherSalarySummary>({
-    queryKey: ["teacherSalary"],
+    queryKey: ["teacherSalary", month, year],
     queryFn: async () => {
-      const { data } = await api.get("api/v1/teachers/me/salary-summary");
+      const params = new URLSearchParams();
+      if (month) params.append("month", month.toString());
+      if (year) params.append("year", year.toString());
+      
+      const queryString = params.toString();
+      const url = queryString
+        ? `api/v1/teachers/me/salary-summary?${queryString}`
+        : "api/v1/teachers/me/salary-summary";
+      
+      const { data } = await api.get(url);
       return data;
     },
   });

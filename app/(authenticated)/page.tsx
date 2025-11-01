@@ -7,20 +7,81 @@ import { SalarySkeleton } from "@/components/global/salary-skeleton";
 import { ClassCardSkeleton } from "@/components/global/class-card-skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/contexts/auth-context";
 import { useTeacherSalary } from "@/hooks/use-teacher-salary";
 import { useTeacherSchedule } from "@/hooks/use-teacher-schedule";
-import { ChevronRight, Clock, UserPlus } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { Clock, UserPlus } from "lucide-react";
 import Header from "./_components/header";
 import TeacherWorkedHoursTable from "@/components/global/teacher-worked-hours-table";
 
 export default function Home() {
+  const { currentUser } = useAuth();
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  // Obter a data de criação do professor
+  const teacherCreatedDate = currentUser?.createdAt
+    ? new Date(currentUser.createdAt)
+    : new Date(); // Fallback para data atual se não houver createdAt
+  const teacherCreatedYear = teacherCreatedDate.getFullYear();
+  const teacherCreatedMonth = teacherCreatedDate.getMonth() + 1;
+
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    // Se o ano atual for o ano de criação, garantir que o mês está no intervalo válido
+    if (currentYear === teacherCreatedYear) {
+      // Usar o mês atual, mas garantir que não seja menor que o mês de criação
+      return Math.max(teacherCreatedMonth, currentMonth);
+    }
+    return currentMonth;
+  });
+  const [selectedYear, setSelectedYear] = useState(
+    Math.max(teacherCreatedYear, currentYear)
+  );
+
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    const isCurrentYear = year === currentYear;
+    const isCreatedYear = year === teacherCreatedYear;
+
+    if (isCurrentYear && isCreatedYear) {
+      // Ano atual E ano de criação: garantir que o mês está entre mês de criação e mês atual
+      if (selectedMonth < teacherCreatedMonth) {
+        setSelectedMonth(teacherCreatedMonth);
+        return;
+      }
+      if (selectedMonth > currentMonth) {
+        setSelectedMonth(currentMonth);
+        return;
+      }
+      return;
+    }
+
+    if (isCurrentYear) {
+      // Apenas ano atual: garantir que não seja maior que o mês atual
+      if (selectedMonth > currentMonth) {
+        setSelectedMonth(currentMonth);
+        return;
+      }
+      return;
+    }
+
+    if (isCreatedYear) {
+      // Apenas ano de criação: garantir que não seja menor que o mês de criação
+      if (selectedMonth < teacherCreatedMonth) {
+        setSelectedMonth(teacherCreatedMonth);
+        return;
+      }
+      return;
+    }
+  };
+
 
   const {
     data: salaryData,
     isLoading: isLoadingSalary,
     error: salaryError,
-  } = useTeacherSalary();
+  } = useTeacherSalary(selectedMonth, selectedYear);
   const {
     data: scheduleData,
     isLoading: isLoadingSchedule,
@@ -45,7 +106,12 @@ export default function Home() {
   if (hasError) {
     return (
       <section className="flex flex-col gap-4">
-        <Header />
+        <Header
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={setSelectedMonth}
+          onYearChange={handleYearChange}
+        />
         <section className="px-4 flex items-center justify-center py-8">
           <p className="text-red-500">Erro ao carregar dados</p>
         </section>
@@ -55,7 +121,12 @@ export default function Home() {
 
   return (
     <section className="flex flex-col gap-4">
-      <Header />
+      <Header
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+        onMonthChange={setSelectedMonth}
+        onYearChange={handleYearChange}
+      />
 
       {/* Salary Section */}
       {isLoadingSalary ? (
