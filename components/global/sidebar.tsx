@@ -73,7 +73,7 @@ export function Sidebar() {
         <SidebarHeader className="flex items-center gap-6 pt-6 pb-0 justify-center">
           <header className="flex items-center justify-between w-full px-4 py-3 border-b border-white/10">
             <span className="text-xl font-bold tracking-tight">
-              Lune Teacher
+              {/* Lune Teacher */}
             </span>
           </header>
         </SidebarHeader>
